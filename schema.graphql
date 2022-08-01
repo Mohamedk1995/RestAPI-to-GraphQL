@@ -1,0 +1,25 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    info: String!
+    feed: [Article!]!
+    find(id: ID!): Article!
+}
+
+type Article {
+    id: ID!
+    title: String!
+    description: String!
+    content: String!
+}
+
+type Mutation {
+  post(id:ID!, title: String!, description: String!, content: String!): Article!
+  update(id:ID!, title: String!, description: String!, content: String!): Article!
+  delete(id:ID!): [Article!]!
+  }
+
+
