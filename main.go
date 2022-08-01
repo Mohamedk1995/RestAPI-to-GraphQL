@@ -131,6 +131,21 @@ func (r *RootResolver) Info() (string, error) {
 	return "this is a thing", nil
 }
 
+//CORS - Cross Origin Resource Sharing
+
+func Cors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func parseSchema(path string, resolver interface{}) *graphql.Schema {
 	bstr, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -147,10 +162,12 @@ func parseSchema(path string, resolver interface{}) *graphql.Schema {
 	}
 	return parsedSchema
 }
+
+
 func main() {
-	http.Handle("/graphql", &relay.Handler{
+	http.Handle("/graphql", Cors(&relay.Handler{
 		Schema: parseSchema("./schema.graphql", &RootResolver{}),
-	})
+	}))
 
 	fmt.Println("serving on 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
